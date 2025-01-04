@@ -1,5 +1,5 @@
 local MAX_FPS = 20
-local MIN_FPS = 15
+local MIN_FPS = 15 
 local ENABLE_RENDER = true
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -14,93 +14,73 @@ local lastClickTime = 0
 local doubleClickInterval = 0.3
 
 local function createBlackScreen()
-    blackScreen = Instance.new("Frame")
-    blackScreen.Size = UDim2.new(1, 0, 1, 0)
-    blackScreen.Position = UDim2.new(0, 0, 0, 0)
-    blackScreen.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    blackScreen.BackgroundTransparency = 0
-    blackScreen.Parent = PlayerGui
-    print("Black screen created")
+    if not blackScreen then
+        blackScreen = Instance.new("ScreenGui")
+        blackScreen.IgnoreGuiInset = true
+        blackScreen.ResetOnSpawn = false
+
+        local blackFrame = Instance.new("Frame")
+        blackFrame.Size = UDim2.new(1, 0, 1, 0)
+        blackFrame.Position = UDim2.new(0, 0, 0, 0)
+        blackFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        blackFrame.BackgroundTransparency = 0
+        blackFrame.BorderSizePixel = 0
+        blackFrame.Parent = blackScreen
+
+        blackScreen.Parent = PlayerGui
+    end
 end
 
 local function removeBlackScreen()
     if blackScreen then
         blackScreen:Destroy()
         blackScreen = nil
-        print("Black screen removed")
     end
 end
 
 local function disableEffects()
     Lighting.GlobalShadows = false
-    Lighting.Brightness = 0
-    Lighting.FogEnd = 0
-    Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+    Lighting.Brightness = 1
+    Lighting.FogEnd = 100000
+    Lighting.Ambient = Color3.fromRGB(128, 128, 128)
 
     for _, sound in ipairs(game:GetDescendants()) do
         if sound:IsA("Sound") then
-            sound:Stop()
+            sound.Volume = 0
         end
     end
 
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        if obj:IsA("BasePart") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
-            obj.Anchored = true
-            obj.CanCollide = false
-            obj.Transparency = 1
-        end
+    for i, v in next, Workspace:GetDescendants() do
+        pcall(function()
+            v.Transparency = 1
+        end)
     end
 
-    local effects = {"ParticleEmitter", "Trail", "Decal", "SpecialMesh"}
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        if table.find(effects, obj.ClassName) then
-            obj:Destroy()
-        end
-    end
-end
-
-local function deleteMap()
-    for _, obj in ipairs(Workspace:GetChildren()) do
-        if obj:IsA("Terrain") then
-            print("Skipping Terrain object")
-        else
-            if obj:IsA("Model") or obj:IsA("BasePart") then
-                obj:Destroy()
-                print("Deleted object:", obj.Name)
+    for i, v in next, getnilinstances() do
+        pcall(function()
+            v.Transparency = 1
+            for i1, v1 in next, v:GetDescendants() do
+                v1.Transparency = 1
             end
-        end
+        end)
     end
+
+    local workspaceMonitor = Workspace
+    workspaceMonitor.DescendantAdded:Connect(function(v)
+        pcall(function()
+            v.Transparency = 1
+        end)
+    end)
 end
 
 local function setRenderState(enabled)
     if enabled then
-        print("Enabling render state")
         disableEffects()
-        deleteMap()
         createBlackScreen()
-        RunService.Heartbeat:Connect(function() end)
-        RunService.RenderStepped:Connect(function() end)
     else
-        print("Disabling render state")
         removeBlackScreen()
     end
 end
-
-UserInputService.WindowFocused:Connect(function()
-    print("Window focused")
-    if ENABLE_RENDER then
-        setRenderState(true)
-    end
-    print("FPS set to max:", MAX_FPS)
-end)
-
-UserInputService.WindowFocusReleased:Connect(function()
-    print("Window focus released")
-    if ENABLE_RENDER then
-        setRenderState(false)
-    end
-    print("FPS set to min:", MIN_FPS)
-end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -108,8 +88,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         local currentTime = tick()
         if currentTime - lastClickTime <= doubleClickInterval then
             removeBlackScreen()
-            print("Double click detected")
         end
         lastClickTime = currentTime
     end
 end)
+
+setRenderState(true)
+setfpscap(MAX_FPS)
