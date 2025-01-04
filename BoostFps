@@ -1,5 +1,5 @@
-local MAX_FPS = 20
-local MIN_FPS = 15
+local MAX_FPS = 360
+local MIN_FPS = 5
 local ENABLE_RENDER = true
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -7,8 +7,7 @@ local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
-
-local PlayerGui = Player:WaitForChild("PlayerGui", 10)
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local blackScreen
 local lastClickTime = 0
@@ -89,10 +88,26 @@ local function setRenderState(enabled)
         disableEffects()
         deleteMap()
         createBlackScreen()
+        RunService.Heartbeat:Connect(function() end)
+        RunService.RenderStepped:Connect(function() end)
     else
         removeBlackScreen()
     end
 end
+
+UserInputService.WindowFocused:Connect(function()
+    if ENABLE_RENDER then
+        setRenderState(true)
+    end
+    setfpscap(MAX_FPS)
+end)
+
+UserInputService.WindowFocusReleased:Connect(function()
+    if ENABLE_RENDER then
+        setRenderState(false)
+    end
+    setfpscap(MIN_FPS)
+end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -104,25 +119,3 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         lastClickTime = currentTime
     end
 end)
-for i,v in next, workspace:GetDescendants() do
-    pcall(function()
-        v.Transparency = 1
-    end)
-end
-for i,v in next, getnilinstances() do
-    pcall(function()
-        v.Transparency = 1
-        for i1,v1 in next, v:GetDescendants() do
-            v1.Transparency = 1
-        end
-    end)
-end
-a = workspace
-a.DescendantAdded:Connect(function(v)
-    pcall(function()
-        v.Transparency = 1
-    end)
-end)
-
-setRenderState(true)
-setfpscap(MAX_FPS)
