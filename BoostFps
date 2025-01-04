@@ -6,7 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
+local Player = game.Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local blackScreen
@@ -14,28 +14,20 @@ local lastClickTime = 0
 local doubleClickInterval = 0.3
 
 local function createBlackScreen()
-    if not blackScreen then
-        blackScreen = Instance.new("ScreenGui")
-        blackScreen.Name = "BlackScreen"
-        blackScreen.IgnoreGuiInset = true
-        blackScreen.ResetOnSpawn = false
-
-        local blackFrame = Instance.new("Frame")
-        blackFrame.Size = UDim2.new(1, 0, 1, 0)
-        blackFrame.Position = UDim2.new(0, 0, 0, 0)
-        blackFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        blackFrame.BackgroundTransparency = 0
-        blackFrame.BorderSizePixel = 0
-        blackFrame.Parent = blackScreen
-
-        blackScreen.Parent = PlayerGui
-    end
+    blackScreen = Instance.new("Frame")
+    blackScreen.Size = UDim2.new(1, 0, 1, 0)
+    blackScreen.Position = UDim2.new(0, 0, 0, 0)
+    blackScreen.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    blackScreen.BackgroundTransparency = 0
+    blackScreen.Parent = PlayerGui
+    print("Black screen created")
 end
 
 local function removeBlackScreen()
     if blackScreen then
         blackScreen:Destroy()
         blackScreen = nil
+        print("Black screen removed")
     end
 end
 
@@ -65,19 +57,16 @@ local function disableEffects()
             obj:Destroy()
         end
     end
-
-    for _, cloud in ipairs(Lighting:GetChildren()) do
-        if cloud:IsA("Clouds") then
-            cloud:Destroy()
-        end
-    end
 end
 
 local function deleteMap()
     for _, obj in ipairs(Workspace:GetChildren()) do
-        if not obj:IsA("Terrain") then
+        if obj:IsA("Terrain") then
+            print("Skipping Terrain object")
+        else
             if obj:IsA("Model") or obj:IsA("BasePart") then
                 obj:Destroy()
+                print("Deleted object:", obj.Name)
             end
         end
     end
@@ -85,28 +74,32 @@ end
 
 local function setRenderState(enabled)
     if enabled then
+        print("Enabling render state")
         disableEffects()
         deleteMap()
         createBlackScreen()
         RunService.Heartbeat:Connect(function() end)
         RunService.RenderStepped:Connect(function() end)
     else
+        print("Disabling render state")
         removeBlackScreen()
     end
 end
 
 UserInputService.WindowFocused:Connect(function()
+    print("Window focused")
     if ENABLE_RENDER then
         setRenderState(true)
     end
-    setfpscap(MAX_FPS)
+    print("FPS set to max:", MAX_FPS)
 end)
 
 UserInputService.WindowFocusReleased:Connect(function()
+    print("Window focus released")
     if ENABLE_RENDER then
         setRenderState(false)
     end
-    setfpscap(MIN_FPS)
+    print("FPS set to min:", MIN_FPS)
 end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -115,6 +108,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         local currentTime = tick()
         if currentTime - lastClickTime <= doubleClickInterval then
             removeBlackScreen()
+            print("Double click detected")
         end
         lastClickTime = currentTime
     end
