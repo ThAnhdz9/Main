@@ -13,9 +13,10 @@ local blackScreen
 local lastClickTime = 0
 local doubleClickInterval = 0.3
 local errorCodes = {
-    "276", "277", "278", 
-    "500", "503", "504", 
-    "524"                
+    "276", "277", "278", -- Lỗi kết nối
+    "500", "503", "504", -- Lỗi server
+    "524",               -- Timeout
+    "773"                -- Lỗi kết nối đặc biệt
 }
 local function autoBackToMainMenu()
     for _, errorCode in ipairs(errorCodes) do
@@ -28,13 +29,11 @@ local function autoBackToMainMenu()
         end)
     end
 end
-
 local function createBlackScreen()
     if not blackScreen then
         blackScreen = Instance.new("ScreenGui")
         blackScreen.IgnoreGuiInset = true
         blackScreen.ResetOnSpawn = false
-
         local blackFrame = Instance.new("Frame")
         blackFrame.Size = UDim2.new(1, 0, 1, 0)
         blackFrame.Position = UDim2.new(0, 0, 0, 0)
@@ -86,6 +85,8 @@ local function disableEffects()
         end)
     end)
 end
+
+-- Cài đặt trạng thái render
 local function setRenderState(enabled)
     if enabled then
         disableEffects()
