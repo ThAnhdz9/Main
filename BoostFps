@@ -8,10 +8,26 @@ local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local Player = game.Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
-
+local TeleportService = game:GetService("TeleportService")
 local blackScreen
 local lastClickTime = 0
 local doubleClickInterval = 0.3
+local errorCodes = {
+    "276", "277", "278", 
+    "500", "503", "504", 
+    "524"                
+}
+local function autoBackToMainMenu()
+    for _, errorCode in ipairs(errorCodes) do
+        Player.OnTeleport:Connect(function(state)
+            if state == Enum.TeleportState.Failed then
+                warn("Teleport failed with error:", errorCode)
+                -- Chuyển người chơi về trang chính (menu)
+                TeleportService:Teleport(0, Player)  -- ID của trò chơi chính là 0
+            end
+        end)
+    end
+end
 
 local function createBlackScreen()
     if not blackScreen then
@@ -30,14 +46,12 @@ local function createBlackScreen()
         blackScreen.Parent = PlayerGui
     end
 end
-
 local function removeBlackScreen()
     if blackScreen then
         blackScreen:Destroy()
         blackScreen = nil
     end
 end
-
 local function disableEffects()
     Lighting.GlobalShadows = false
     Lighting.Brightness = 1
@@ -72,7 +86,6 @@ local function disableEffects()
         end)
     end)
 end
-
 local function setRenderState(enabled)
     if enabled then
         disableEffects()
@@ -81,7 +94,6 @@ local function setRenderState(enabled)
         removeBlackScreen()
     end
 end
-
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -92,6 +104,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         lastClickTime = currentTime
     end
 end)
-
+autoBackToMainMenu()
 setRenderState(true)
 setfpscap(MAX_FPS)
