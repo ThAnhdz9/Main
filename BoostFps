@@ -12,23 +12,6 @@ local TeleportService = game:GetService("TeleportService")
 local blackScreen
 local lastClickTime = 0
 local doubleClickInterval = 0.3
-local errorCodes = {
-    "276", "277", "278", -- Lỗi kết nối
-    "500", "503", "504", -- Lỗi server
-    "524",               -- Timeout
-    "773"                -- Lỗi kết nối đặc biệt
-}
-local function autoBackToMainMenu()
-    for _, errorCode in ipairs(errorCodes) do
-        Player.OnTeleport:Connect(function(state)
-            if state == Enum.TeleportState.Failed then
-                warn("Teleport failed with error:", errorCode)
-                -- Chuyển người chơi về trang chính (menu)
-                TeleportService:Teleport(0, Player)  -- ID của trò chơi chính là 0
-            end
-        end)
-    end
-end
 local function createBlackScreen()
     if not blackScreen then
         blackScreen = Instance.new("ScreenGui")
@@ -56,7 +39,6 @@ local function disableEffects()
     Lighting.Brightness = 1
     Lighting.FogEnd = 100000
     Lighting.Ambient = Color3.fromRGB(128, 128, 128)
-
     for _, sound in ipairs(game:GetDescendants()) do
         if sound:IsA("Sound") then
             sound.Volume = 0
@@ -67,7 +49,6 @@ local function disableEffects()
             v.Transparency = 1
         end)
     end
-
     for i, v in next, getnilinstances() do
         pcall(function()
             v.Transparency = 1
@@ -101,6 +82,5 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         lastClickTime = currentTime
     end
 end)
-autoBackToMainMenu()
 setRenderState(true)
 setfpscap(MAX_FPS)
