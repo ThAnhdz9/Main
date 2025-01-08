@@ -12,6 +12,12 @@ local TeleportService = game:GetService("TeleportService")
 local blackScreen
 local lastClickTime = 0
 local doubleClickInterval = 0.3
+local errorCodes = {
+    "276", "277", "278", -- Lỗi kết nối
+    "500", "503", "504", -- Lỗi server
+    "524",               -- Timeout
+    "773"                -- Lỗi kết nối đặc biệt
+}
 local function createBlackScreen()
     if not blackScreen then
         blackScreen = Instance.new("ScreenGui")
