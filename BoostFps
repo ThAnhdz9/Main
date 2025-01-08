@@ -18,6 +18,17 @@ local errorCodes = {
     "524",               -- Timeout
     "773"                -- Lỗi kết nối đặc biệt
 }
+local function autoBackToMainMenu()
+    for _, errorCode in ipairs(errorCodes) do
+        Player.OnTeleport:Connect(function(state)
+            if state == Enum.TeleportState.Failed then
+                warn("Teleport failed with error:", errorCode)
+                -- Chuyển người chơi về trang chính (menu)
+                TeleportService:Teleport(0, Player)  -- ID của trò chơi chính là 0
+            end
+        end)
+    end
+end
 local function createBlackScreen()
     if not blackScreen then
         blackScreen = Instance.new("ScreenGui")
@@ -51,7 +62,6 @@ local function disableEffects()
             sound.Volume = 0
         end
     end
-
     for i, v in next, Workspace:GetDescendants() do
         pcall(function()
             v.Transparency = 1
@@ -66,7 +76,6 @@ local function disableEffects()
             end
         end)
     end
-
     local workspaceMonitor = Workspace
     workspaceMonitor.DescendantAdded:Connect(function(v)
         pcall(function()
@@ -74,8 +83,6 @@ local function disableEffects()
         end)
     end)
 end
-
--- Cài đặt trạng thái render
 local function setRenderState(enabled)
     if enabled then
         disableEffects()
