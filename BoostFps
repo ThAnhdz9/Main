@@ -1,5 +1,5 @@
 local MAX_FPS = 20
-local MIN_FPS = 15
+local MIN_FPS = 15 
 local ENABLE_RENDER = true
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -9,21 +9,9 @@ local Players = game:GetService("Players")
 local Player = game.Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 local TeleportService = game:GetService("TeleportService")
-local StarterGui = game:GetService("StarterGui")
 local blackScreen
 local lastClickTime = 0
 local doubleClickInterval = 0.3
-local function hideMessages()
-    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
-end
-local function reduceGraphics()
-    local settings = UserSettings():GetService("UserGameSettings")
-    settings.MasterVolume = 0 -- Tắt âm thanh
-    settings.SavedQualityLevel = Enum.SavedQualitySetting.Level01 -- Chất lượng thấp nhất
-    settings.GraphicsQualityLevel = 1 -- Đồ họa ở mức thấp nhất
-    settings.Fullscreen = false -- Tắt chế độ toàn màn hình (tùy chỉnh theo ý bạn)
-    warn("Đã giảm đồ họa xuống mức thấp nhất!")
-end
 local function createBlackScreen()
     if not blackScreen then
         blackScreen = Instance.new("ScreenGui")
@@ -56,15 +44,15 @@ local function disableEffects()
             sound.Volume = 0
         end
     end
-    for _, v in ipairs(Workspace:GetDescendants()) do
+    for i, v in next, Workspace:GetDescendants() do
         pcall(function()
             v.Transparency = 1
         end)
     end
-    for _, v in ipairs(getnilinstances()) do
+    for i, v in next, getnilinstances() do
         pcall(function()
             v.Transparency = 1
-            for _, v1 in ipairs(v:GetDescendants()) do
+            for i1, v1 in next, v:GetDescendants() do
                 v1.Transparency = 1
             end
         end)
@@ -94,7 +82,5 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         lastClickTime = currentTime
     end
 end)
-hideMessages()
-reduceGraphics()
 setRenderState(true)
 setfpscap(MAX_FPS)
