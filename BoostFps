@@ -9,9 +9,20 @@ local Players = game:GetService("Players")
 local Player = game.Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 local TeleportService = game:GetService("TeleportService")
+local screenGui = Instance.new("ScreenGui")
+local textLabel = Instance.new("TextLabel")
 local blackScreen
 local lastClickTime = 0
 local doubleClickInterval = 0.3
+screenGui.Parent = PlayerGui
+screenGui.DisplayOrder = 100
+textLabel.Parent = screenGui
+textLabel.Size = UDim2.new(0, 300, 0, 50)
+textLabel.Position = UDim2.new(0, 10, 0, 10)
+textLabel.Font = Enum.Font.FredokaOne
+textLabel.TextScaled = true
+textLabel.BackgroundTransparency = 1
+textLabel.TextStrokeTransparency = 0
 local function createBlackScreen()
     if not blackScreen then
         blackScreen = Instance.new("ScreenGui")
@@ -44,25 +55,11 @@ local function disableEffects()
             sound.Volume = 0
         end
     end
-    for i, v in next, Workspace:GetDescendants() do
+    for _, v in ipairs(Workspace:GetDescendants()) do
         pcall(function()
             v.Transparency = 1
         end)
     end
-    for i, v in next, getnilinstances() do
-        pcall(function()
-            v.Transparency = 1
-            for i1, v1 in next, v:GetDescendants() do
-                v1.Transparency = 1
-            end
-        end)
-    end
-    local workspaceMonitor = Workspace
-    workspaceMonitor.DescendantAdded:Connect(function(v)
-        pcall(function()
-            v.Transparency = 1
-        end)
-    end)
 end
 local function setRenderState(enabled)
     if enabled then
@@ -70,6 +67,30 @@ local function setRenderState(enabled)
         createBlackScreen()
     else
         removeBlackScreen()
+    end
+end
+local frameCount = 0
+local lastUpdate = tick()
+RunService.RenderStepped:Connect(function()
+    frameCount = frameCount + 1
+    local now = tick()
+
+    if now - lastUpdate >= 1 then
+        local fps = frameCount / (now - lastUpdate)
+        frameCount = 0
+        lastUpdate = now
+
+        local userName = Player.Name
+        textLabel.Text = string.format("%s, FPS: %d", userName, math.floor(fps))
+    end
+end)
+local function rainbowColor()
+    local hue = 0
+    while true do
+        hue = hue + 0.01
+        if hue > 1 then hue = 0 end
+        textLabel.TextColor3 = Color3.fromHSV(hue, 1, 1)
+        RunService.RenderStepped:Wait()
     end
 end
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -84,3 +105,4 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 end)
 setRenderState(true)
 setfpscap(MAX_FPS)
+spawn(rainbowColor)
