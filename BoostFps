@@ -1,5 +1,5 @@
-local MAX_FPS = 20
-local MIN_FPS = 15
+local MAX_FPS = 15
+local MIN_FPS = 10
 local ENABLE_RENDER = true
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
